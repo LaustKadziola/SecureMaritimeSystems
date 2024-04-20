@@ -1,0 +1,22 @@
+
+
+// Running topology
+sudo mn --custom MyTopo.py --topo=mytopo
+
+// Configura keyboard language
+sudo dpkg-reconfigure keyboard-configuration
+
+
+// ip settings
+ifconfig -a
+
+
+// Open host terminal
+xterm <Host>
+
+
+// Terminal editor
+nano
+
+// Open mininet in terminal in parent machine
+ssh mininet@localhost -p 2223
