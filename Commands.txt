@@ -10,6 +10,9 @@ sudo dpkg-reconfigure keyboard-configuration
 // ip settings
 ifconfig -a
 
+// set premisions
+chmod +rwx [filename]
+
 
 // Open host terminal
 xterm <Host>
@@ -20,3 +23,9 @@ nano
 
 // Open mininet in terminal in parent machine
 ssh mininet@localhost -p 2223
+
+
+// Date config
+sudo dpkg-reconfigure ntp
+ntpq -p
+date
