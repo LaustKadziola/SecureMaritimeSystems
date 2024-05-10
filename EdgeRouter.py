@@ -19,6 +19,7 @@ def ConnectionToAgent(conn, addr):
     with conn:
         (ip_addr, port) = addr
         print("Connected by " + str(ip_addr) + ", " + str(port))
+
         while True:
             data = conn.recv(1024)
             if data:
@@ -33,16 +34,18 @@ def ConnectionToAgent(conn, addr):
                         print(mrn)
                         print(message.protocolMessage.connectMessage.reconnectToken)
                         AddConnection(message, ip_addr, port)
+                        conn.sendall(data)
                     elif (message.protocolMessage.protocolMsgType == messages_pb2.ProtocolMessageType.SEND_MESSAGE):
                         print("    Send Message")
                         ReceivedSendMessage(message)
+                        conn.sendall(data)
                     elif (message.protocolMessage.protocolMsgType == messages_pb2.ProtocolMessageType.RECIEVE_MESSAGE):
                         print("    recieve Message")
                         print(message.protocolMessage.connectMessage.ownMrn)
                         print(message.protocolMessage.connectMessage.reconnectToken)
                         HandelReceiveMessage(message, mrn, conn)
 
-                conn.sendall(data)
+
     pass
 
 

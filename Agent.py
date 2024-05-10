@@ -117,7 +117,11 @@ class Agent:
         data = self.EdgeRouter.recv(1024)
         messageRecv = messages_pb2.MmtpMessage()
         messageRecv.ParseFromString(data)
-        print(messageRecv.prsponseMessage.applicationMessage[0].body.decode('utf-8'))
+
+        messages = messageRecv.prsponseMessage.applicationMessage
+
+        for m in messages:
+            print(m.body.decode('utf-8'))
         print(messageRecv.prsponseMessage.response)
         pass
 
