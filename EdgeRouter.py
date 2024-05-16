@@ -44,8 +44,6 @@ def ConnectionToAgent(conn, addr):
                         print(message.protocolMessage.connectMessage.ownMrn)
                         print(message.protocolMessage.connectMessage.reconnectToken)
                         HandelReceiveMessage(message, mrn, conn)
-
-
     pass
 
 
