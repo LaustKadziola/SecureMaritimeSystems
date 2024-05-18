@@ -46,16 +46,16 @@ def topology():
         s2.cmd("ovs-ofctl add-flow s2 priority=65535,ip,dl_dst=00:00:00:00:01:02,actions=output:1")
         s2.cmd("ovs-ofctl add-flow s2 priority=10,ip,nw_dst=10.0.2.0/24,actions=output:2")
 
-        print "setup Edge router"
+        print("setup Edge router") 
         r1.sendCmd("xterm -e 'sudo python3.6 EdgeRouter.py'")
 
         h1.sendCmd("xterm")
         h2.cmd("xterm")
 
-        print "*** Running CLI"
+        print("*** Running CLI")
         CLI( net )
 
-        print "*** Stopping network"
+        print("*** Stopping network")
         net.stop()
 
 

@@ -1,0 +1,6 @@
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/SecureMaritimeSystems
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/SecureMaritimeSystems.dll
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/SecureMaritimeSystems.deps.json
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/SecureMaritimeSystems.runtimeconfig.json
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/SecureMaritimeSystems.pdb
+/home/mininet/Desktop/SecureMaritimeSystems/bin/Release/net8.0/linux-x64/publish/Google.Protobuf.dll

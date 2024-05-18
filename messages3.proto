@@ -1,11 +1,13 @@
-syntax = "proto2";
+syntax = "proto3";
+
+package Mmtp;
 
 message MmtpMessage {
-	required MsgType msgType = 1;
-	required string uuid = 2;
+	MsgType msgType = 1;
+	string uuid = 2;
 	oneof body {
 	      ProtocolMessage protocolMessage = 4;
-	      ResponseMessage prsponseMessage = 5;
+	      ResponseMessage responseMessage = 5;
 	}
 }
 
@@ -28,17 +30,17 @@ enum ProtocolMessageType {
 }
 
 message ResponseMessage {
-	required string responseToUuid = 1;
-	required ResponseEnum response = 2;
-	optional string reasonText = 3;
+	string responseToUuid = 1;
+	ResponseEnum response = 2;
+	string reasonText = 3;
 	repeated MessageMetadata messageMetadata = 4;
 	repeated ApplicationMessage applicationMessage = 5;
-	optional string reconnectToken = 6;
+	string reconnectToken = 6;
 }
 
 message MessageMetadata {
-	required string uuid = 1;
-	required ApplicationMessageHeader header = 2;
+	string uuid = 1;
+	ApplicationMessageHeader header = 2;
 }
 
 enum ResponseEnum {
@@ -48,9 +50,9 @@ enum ResponseEnum {
 }
 
 message ApplicationMessage {
-	required ApplicationMessageHeader header = 1;
-	required bytes body = 2;
-	required string signature = 3;
+	ApplicationMessageHeader header = 1;
+	bytes body = 2;
+	string signature = 3;
 }
 
 message Recipients {
@@ -62,14 +64,14 @@ message ApplicationMessageHeader {
 	      string subject = 1;
 	      Recipients recipients = 2;
 	}
-	required int64 expires = 3;
-	required string sender = 4;
-	optional string qosProfile = 5;
-	required uint32 bodySizeNumBytes = 6;
+	int64 expires = 3;
+	string sender = 4;
+	string qosProfile = 5;
+	uint32 bodySizeNumBytes = 6;
 }
 
 message ProtocolMessage {
-	required ProtocolMessageType protocolMsgType = 1;
+	ProtocolMessageType protocolMsgType = 1;
 	oneof body {
 	      Subscribe subscribeMessage = 2;
 	      Unsubscribe unsubscribeMessage = 3;
@@ -96,11 +98,11 @@ message Unsubscribe {
 }
 
 message Send {
-	required ApplicationMessage applicationMessage = 1;
+	ApplicationMessage applicationMessage = 1;
 }
 
 message Receive {
-	optional Filter filter = 1;
+	Filter filter = 1;
 }
 
 message Filter {
@@ -112,6 +114,6 @@ message Fetch {}
 message Disconnect {}
 
 message Connect {
-	optional string ownMrn = 1;
-	optional string reconnectToken = 2;
+	string ownMrn = 1;
+	string reconnectToken = 2;
 }
