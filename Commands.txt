@@ -29,3 +29,15 @@ ssh mininet@localhost -p 2223
 sudo dpkg-reconfigure ntp
 ntpq -p
 date
+
+
+git remote set-url origin https://LaustKadziola:token@github.com/LaustKadziola/SecureMaritimeSystems.git
+
+
+// Generating keys
+// private key
+openssl ecparam -name prime256v1 -genkey -noout -out [filename].pem
+// Public key
+openssl ec -in [filename-private].pem -pubout -out [filename].pem
+// Generate cert
+openssl req -new -x509 -key private-key.pem -out cert-host1.pem -days 360

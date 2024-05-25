@@ -2,68 +2,49 @@
 using System.Text;
 using Google.Protobuf;
 using Mmtp;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Asn1.X9;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Operators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.X509;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.OpenSsl;
 
 namespace MMSAgent;
 
 public class Agent
 {
+
     const string HOST = "10.0.1.1";
     const int PORT = 65432;
 
-    string ownMrn = "";
+    const string MDNS_ADDRESS = "224.0.0.251";
+    const int MDNS_PORT = 5353;
+
+
+    static string pathPrivate => Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "Certificates", $"private-{ownMrn}.prm");
+    static string pathPublic => Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "Certificates", $"Public-{ownMrn}.prm");
+
+    static string ownMrn = "someMrn";
 
     TcpClient tcpClient = new TcpClient();
 
-    public Agent()
+    public Agent(string mrn)
     {
+        ownMrn = mrn;
+        //MakeCert();
         Console.WriteLine("Starting agent");
-
-        bool isRunning = true;
-
-        string quit()
-        {
-            isRunning = false;
-            return "quiting";
-        }
-
-        while (isRunning)
-        {
-            Console.WriteLine(tcpClient.Connected);
-            Console.Write("Input Command: ");
-            string str = Console.ReadLine() ?? string.Empty;
-            string response = str switch
-            {
-                "c" => ConnectHelper(),
-                "s" => SendHelper(),
-                "q" => quit(),
-                "r" => Receive(),
-                "d" => Disconnect(),
-                _ => "Undefined Command"
-            };
-
-            Console.WriteLine(response);
-        }
-    }
-
-    private string ConnectHelper()
-    {
-        Console.WriteLine("Set MRN: ");
-        string mrn = Console.ReadLine() ?? "";
-        return ConnectAuthenticated(mrn, "someSertificate");
-    }
-
-    private string SendHelper()
-    {
-        Console.Write("Message: ");
-        string message = Console.ReadLine() ?? string.Empty;
-        Console.Write("MRN: ");
-        List<string> mrn = [Console.ReadLine() ?? "undefined"];
-        return Send(0, mrn, message);
     }
 
     public string ConnectAuthenticated(string mrnEdgeRouter, string certificate)
     {
-
         MmtpMessage response;
         MmtpMessage message = new MmtpMessage
         {
@@ -219,6 +200,63 @@ public class Agent
         int k = stm.Read(buffer, 0, 1024);
         MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
         return connectMessage;
+    }
+
+    private void MakeCert()
+    {
+        var curvename = "secp256k1";
+
+        X9ECParameters par = ECNamedCurveTable.GetByName(curvename);
+
+        var curParam = new ECDomainParameters(par.Curve, par.G, par.N, par.H, par.GetSeed());
+
+        ECKeyGenerationParameters keyGenParam = new ECKeyGenerationParameters(curParam, new SecureRandom());
+
+        ECKeyPairGenerator generator = new ECKeyPairGenerator();
+
+        generator.Init(keyGenParam);
+
+        AsymmetricCipherKeyPair keyPair = generator.GenerateKeyPair();
+
+        var privateKey = (ECPrivateKeyParameters)keyPair.Private;
+        var publicKey = (ECPublicKeyParameters)keyPair.Public;
+
+        var certGenerator = new X509V3CertificateGenerator();
+
+        certGenerator.SetSubjectDN(new X509Name($"CN={ownMrn}"));
+        certGenerator.SetNotAfter(DateTime.UtcNow.AddDays(30));
+        certGenerator.SetNotBefore(DateTime.UtcNow);
+        certGenerator.SetPublicKey(publicKey);
+        certGenerator.SetIssuerDN(new X509Name($"CN={ownMrn}"));
+        certGenerator.SetSerialNumber(BigInteger.ValueOf(1));
+
+        var algorithm = X9ObjectIdentifiers.ECDsaWithSha256.ToString();
+        var cert = certGenerator.Generate(new Asn1SignatureFactory(algorithm, privateKey));
+
+
+        Console.WriteLine($"Valid: {ValidateSignature(cert, publicKey)}");
+
+        PemWriter pemWriterPrivate = new PemWriter(new StreamWriter(pathPrivate));
+        pemWriterPrivate.WriteObject(privateKey);
+        pemWriterPrivate.Writer.Flush();
+        pemWriterPrivate.Writer.Close();
+
+        PemWriter pemWriterPublic = new PemWriter(new StreamWriter(pathPublic));
+        pemWriterPublic.WriteObject(privateKey);
+        pemWriterPublic.Writer.Flush();
+        pemWriterPublic.Writer.Close();
+    }
+
+
+    private bool ValidateSignature(X509Certificate cert, ICipherParameters publicKey)
+    {
+        cert.CheckValidity(DateTime.UtcNow);
+        var tbsCert = cert.GetTbsCertificate();
+        var signature = cert.GetSignature();
+        var signer = SignerUtilities.GetSigner(cert.SigAlgName);
+        signer.Init(false, publicKey);
+        signer.BlockUpdate(tbsCert, 0, tbsCert.Length);
+        return signer.VerifySignature(signature);
     }
 
 }

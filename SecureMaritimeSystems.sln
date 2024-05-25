@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecureMaritimeSystems", "SecureMaritimeSystems.csproj", "{F8815527-1380-4BE8-B78F-234EAEDBD2CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentApp", "AgentApp\AgentApp.csproj", "{D496C1AF-7DEE-4210-86FF-534BEDCCB599}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMSAgent", "MMSAgent\MMSAgent.csproj", "{ADD8B18F-B311-43D4-8759-7BDC9BB8F43F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mmtp", "Mmtp\Mmtp.csproj", "{C9444957-1FA9-42DD-9A58-186067740DC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentTest", "AgentTest\AgentTest.csproj", "{58F1F5E4-BE9D-4DAB-A2DC-A381C176AB94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMSEdgeRouter", "MMSEdgeRouter\MMSEdgeRouter.csproj", "{0CC0B32B-2067-4238-B82B-C25AB9EE067D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,26 @@ Global
 		{F8815527-1380-4BE8-B78F-234EAEDBD2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8815527-1380-4BE8-B78F-234EAEDBD2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8815527-1380-4BE8-B78F-234EAEDBD2CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D496C1AF-7DEE-4210-86FF-534BEDCCB599}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D496C1AF-7DEE-4210-86FF-534BEDCCB599}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D496C1AF-7DEE-4210-86FF-534BEDCCB599}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D496C1AF-7DEE-4210-86FF-534BEDCCB599}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADD8B18F-B311-43D4-8759-7BDC9BB8F43F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD8B18F-B311-43D4-8759-7BDC9BB8F43F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD8B18F-B311-43D4-8759-7BDC9BB8F43F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD8B18F-B311-43D4-8759-7BDC9BB8F43F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9444957-1FA9-42DD-9A58-186067740DC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9444957-1FA9-42DD-9A58-186067740DC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9444957-1FA9-42DD-9A58-186067740DC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9444957-1FA9-42DD-9A58-186067740DC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58F1F5E4-BE9D-4DAB-A2DC-A381C176AB94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58F1F5E4-BE9D-4DAB-A2DC-A381C176AB94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58F1F5E4-BE9D-4DAB-A2DC-A381C176AB94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58F1F5E4-BE9D-4DAB-A2DC-A381C176AB94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,13 @@
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/bin/Debug/net8.0/Mmtp.deps.json
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/bin/Debug/net8.0/Mmtp.dll
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/bin/Debug/net8.0/Mmtp.pdb
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.csproj.AssemblyReference.cache
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.GeneratedMSBuildEditorConfig.editorconfig
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.AssemblyInfoInputs.cache
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.AssemblyInfo.cs
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.csproj.CoreCompileInputs.cache
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.sourcelink.json
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.dll
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/refint/Mmtp.dll
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/Mmtp.pdb
+/home/mininet/Desktop/SecureMaritimeSystems/Mmtp/obj/Debug/net8.0/ref/Mmtp.dll
