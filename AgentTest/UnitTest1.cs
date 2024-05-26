@@ -10,6 +10,14 @@ public class Tests
     [SetUp]
     public void Setup()
     {
+        agent1.Verbose = true;
+    }
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        Directory.CreateDirectory("Certificates");
+        Utils.MakeCert("host1");
     }
 
     [TearDown]
@@ -46,5 +54,11 @@ public class Tests
         Assert.That(agent1.ConnectAuthenticated("r1", "cart"), Is.EqualTo(ResponseEnum.Good.ToString()));
         Assert.That(agent1.Disconnect(), Is.EqualTo(ResponseEnum.Good.ToString()));
         Assert.That(agent1.ConnectAuthenticated("r1", "cart"), Is.EqualTo(ResponseEnum.Good.ToString()));
+    }
+
+    [Test]
+    public void TestHash()
+    {
+
     }
 }

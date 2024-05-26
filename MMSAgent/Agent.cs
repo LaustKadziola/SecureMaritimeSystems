@@ -2,12 +2,7 @@
 using System.Text;
 using Google.Protobuf;
 using Mmtp;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Operators;
-using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Math;
@@ -15,6 +10,7 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Crypto.Digests;
 using System.Formats.Asn1;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace MMSAgent;
 
@@ -25,21 +21,13 @@ public class Agent
     const string HOST = "10.0.1.1";
     const int PORT = 65432;
 
-    static string pathPrivate => Path.Combine(
-        Directory.GetCurrentDirectory(),
-        "Certificates", $"private-{ownMrn}.prm");
-    static string pathPublic => Path.Combine(
-        Directory.GetCurrentDirectory(),
-        "Certificates", $"Public-{ownMrn}.prm");
-
-    static string ownMrn = "someMrn";
+    string ownMrn = "someMrn";
 
     TcpClient tcpClient = new TcpClient();
 
     public Agent(string mrn)
     {
         ownMrn = mrn;
-        //MakeCert();
         Log("Starting agent");
     }
 
@@ -107,7 +95,6 @@ public class Agent
                     ApplicationMessage = new ApplicationMessage
                     {
                         Body = body,
-                        Signature = "someSig",
                         Header = new ApplicationMessageHeader
                         {
                             Recipients = recipients,
@@ -124,8 +111,8 @@ public class Agent
         Log(signature);
         SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Signature = signature;
 
-        //SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Header.Sender = "sdfsdf";
-
+        //ByteString bodyTampered = ByteString.CopyFrom(message + "wrong stuff", Encoding.UTF8);
+        //SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Body = bodyTampered;
 
         try
         {
@@ -216,53 +203,10 @@ public class Agent
         return connectMessage;
     }
 
-    private void MakeCert()
-    {
-        var curvename = "secp256k1";
-
-        X9ECParameters par = ECNamedCurveTable.GetByName(curvename);
-
-        var curParam = new ECDomainParameters(par.Curve, par.G, par.N, par.H, par.GetSeed());
-
-        ECKeyGenerationParameters keyGenParam = new ECKeyGenerationParameters(curParam, new SecureRandom());
-
-        ECKeyPairGenerator generator = new ECKeyPairGenerator();
-
-        generator.Init(keyGenParam);
-
-        AsymmetricCipherKeyPair keyPair = generator.GenerateKeyPair();
-
-        var privateKey = (ECPrivateKeyParameters)keyPair.Private;
-        var publicKey = (ECPublicKeyParameters)keyPair.Public;
-
-        var certGenerator = new X509V3CertificateGenerator();
-
-        certGenerator.SetSubjectDN(new X509Name($"CN={ownMrn}"));
-        certGenerator.SetNotAfter(DateTime.UtcNow.AddDays(30));
-        certGenerator.SetNotBefore(DateTime.UtcNow);
-        certGenerator.SetPublicKey(publicKey);
-        certGenerator.SetIssuerDN(new X509Name($"CN={ownMrn}"));
-        certGenerator.SetSerialNumber(BigInteger.ValueOf(1));
-
-        var algorithm = X9ObjectIdentifiers.ECDsaWithSha256.ToString();
-        var cert = certGenerator.Generate(new Asn1SignatureFactory(algorithm, privateKey));
 
 
-        Log($"Valid: {ValidateSignature(cert, publicKey)}");
 
-        PemWriter pemWriterPrivate = new PemWriter(new StreamWriter(pathPrivate));
-        pemWriterPrivate.WriteObject(privateKey);
-        pemWriterPrivate.Writer.Flush();
-        pemWriterPrivate.Writer.Close();
-
-        PemWriter pemWriterPublic = new PemWriter(new StreamWriter(pathPublic));
-        pemWriterPublic.WriteObject(publicKey);
-        pemWriterPublic.Writer.Flush();
-        pemWriterPublic.Writer.Close();
-    }
-
-
-    private bool ValidateSignature(X509Certificate cert, ICipherParameters publicKey)
+    private static bool ValidateCertificate(X509Certificate cert, ICipherParameters publicKey)
     {
         cert.CheckValidity(DateTime.UtcNow);
         var tbsCert = cert.GetTbsCertificate();
@@ -282,20 +226,9 @@ public class Agent
     {
         byte[] messageHash = GenerateHash(message);
 
-        // var curvename = "secp256k1";
-
-        // X9ECParameters ecParams = ECNamedCurveTable.GetByName(curvename);
-        // var curveparam = new ECDomainParameters(ecParams.Curve, ecParams.G, ecParams.N, ecParams.H, ecParams.GetSeed());
-
-        // ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(curveparam, new SecureRandom());
-
-        // ECKeyPairGenerator generator = new ECKeyPairGenerator("ECDSA");
-        // generator.Init(keygenParams);
-        // var keyPair = generator.GenerateKeyPair();
-
         ECDsaSigner signer = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
 
-        PemReader pemReader = new PemReader(new StreamReader(pathPrivate));
+        PemReader pemReader = new PemReader(new StreamReader(Utils.GetpathPrivate(message.Header.Sender)));
         AsymmetricCipherKeyPair keyPair = (AsymmetricCipherKeyPair)pemReader.ReadObject();
 
         signer.Init(true, keyPair.Private);
@@ -336,14 +269,14 @@ public class Agent
     private static bool VerifyeSignature(ApplicationMessage message)
     {
         byte[] messageHash = GenerateHash(message);
-        ECDsaSigner signer = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
-
-        PemReader pemReader = new PemReader(new StreamReader(pathPrivate));
-        AsymmetricCipherKeyPair keyPair = (AsymmetricCipherKeyPair)pemReader.ReadObject();
-
         AsnReader asnReader = new(Convert.FromBase64String(message.Signature), AsnEncodingRules.DER);
 
-        signer.Init(false, keyPair.Public);
+        // Get the public key
+        PemReader pemReader = new PemReader(new StreamReader(Utils.GetpathPublic(message.Header.Sender)));
+        ECPublicKeyParameters publicKeyParameters = (ECPublicKeyParameters)pemReader.ReadObject();
+
+        ECDsaSigner signer = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
+        signer.Init(false, publicKeyParameters);
 
         BigInteger r = new BigInteger(asnReader.ReadIntegerBytes().ToArray());
         BigInteger s = new BigInteger(asnReader.ReadIntegerBytes().ToArray());
