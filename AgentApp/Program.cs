@@ -21,6 +21,7 @@ class Program
         string mrn = args[0];
 
         Agent agent = new(mrn);
+        agent.Verbose = true;
         string certificate = GenerateCertificate(mrn);
 
         while (isRunning)

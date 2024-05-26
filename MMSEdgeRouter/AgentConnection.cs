@@ -23,7 +23,6 @@ class AgentConnection
 
     public void Run()
     {
-
         while (isRunning)
         {
             try
@@ -46,6 +45,11 @@ class AgentConnection
                 };
 
                 response.WriteTo(stm);
+            }
+            catch (IOException)
+            {
+                Console.WriteLine($"Connection reset by: {mrn} at:{socket.RemoteEndPoint}");
+                isRunning = false;
             }
             catch (Exception e)
             {
@@ -73,7 +77,11 @@ class AgentConnection
 
         };
 
-        if (!messageBuffer.ContainsKey(mrn)) { return response; };
+        if (!messageBuffer.ContainsKey(mrn))
+        {
+            Console.WriteLine($" - Buffer diden't have key {mrn}");
+            return response;
+        };
 
         foreach (MmtpMessage m in messageBuffer[mrn])
         {
@@ -100,6 +108,7 @@ class AgentConnection
             {
                 messageBuffer[recipient] = [];
             }
+            Console.WriteLine($" - To mrn: {recipient}");
             messageBuffer[recipient].Add(message);
         }
 

@@ -24,6 +24,7 @@ class EdgeRouter
 
     public void Run()
     {
+        Console.WriteLine($"Edgerouter running at {HOST} : {PORT}");
         while (true)
         {
             ListenForConnection();
