@@ -40,10 +40,19 @@ public class Tests
     }
 
     [Test]
+    public void TestSend()
+    {
+        agent1.ConnectAuthenticated("r1", "cart");
+        long time = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds();
+        Assert.That(agent1.Send(time, new List<string> { "host2" }, "hello"), Is.EqualTo(ResponseEnum.Good.ToString()));
+    }
+
+    [Test]
     public void TestSendRecieveOwn()
     {
         agent1.ConnectAuthenticated("r1", "cart");
-        agent1.Send(0, new List<string> { "host1" }, "hello");
+        long time = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds();
+        agent1.Send(time, new List<string> { "host1" }, "hello");
         string response = agent1.Receive();
         Assert.That(response, Is.EqualTo("hello"));
     }
@@ -56,9 +65,5 @@ public class Tests
         Assert.That(agent1.ConnectAuthenticated("r1", "cart"), Is.EqualTo(ResponseEnum.Good.ToString()));
     }
 
-    [Test]
-    public void TestHash()
-    {
 
-    }
 }

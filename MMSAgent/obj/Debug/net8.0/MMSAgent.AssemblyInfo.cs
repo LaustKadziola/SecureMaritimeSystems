@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MMSAgent")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c65a780f60749e6de531e2820c51412051930c26")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32e364e72d20cf38a92f49091cf516302826be63")]
 [assembly: System.Reflection.AssemblyProductAttribute("MMSAgent")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MMSAgent")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

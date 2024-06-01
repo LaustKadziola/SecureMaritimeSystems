@@ -4,11 +4,13 @@ using System.Net;
 using System.Net.Sockets;
 using Google.Protobuf;
 using Mmtp;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace MMSEdgeRouter;
 
 class EdgeRouter
 {
+
     readonly string HOST = "10.0.1.1";
     readonly int PORT = 65432;
 
@@ -25,6 +27,9 @@ class EdgeRouter
     public void Run()
     {
         Console.WriteLine($"Edgerouter running at {HOST} : {PORT}");
+        Thread trimThread = new Thread(TrimTimeoutMessages);
+        trimThread.Start();
+
         while (true)
         {
             ListenForConnection();
@@ -89,6 +94,34 @@ class EdgeRouter
         AgentConnection connection = new AgentConnection(mrn, socket, messageBuffer);
         connection.Run();
         ConnectionThreads.Remove(mrn);
+    }
+
+    private void TrimTimeoutMessages()
+    {
+        while (true)
+        {
+            Thread.Sleep(1000);
+            foreach (List<MmtpMessage> messageList in messageBuffer.Values)
+            {
+                for (int i = messageList.Count - 1; i >= 0; i--)
+                {
+                    long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    long expiers = messageList[i].
+                        ProtocolMessage.
+                        SendMessage.
+                        ApplicationMessage.
+                        Header.
+                        Expires;
+                    if (currentTime > expiers)
+                    {
+                        Console.WriteLine($"deleted {messageList[i].Uuid}");
+                        Console.WriteLine($"    {currentTime} > {expiers}");
+
+                        messageList.RemoveAt(i);
+                    }
+                }
+            }
+        }
     }
 }
 

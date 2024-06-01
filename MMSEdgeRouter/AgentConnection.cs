@@ -10,13 +10,13 @@ class AgentConnection
     Socket socket;
     private bool isRunning = true;
 
-    readonly string mrn;
+    readonly string agentMrn;
 
     public readonly ConcurrentDictionary<string, List<MmtpMessage>> messageBuffer;
 
     public AgentConnection(string mrn, Socket s, ConcurrentDictionary<string, List<MmtpMessage>> messageBuffer)
     {
-        this.mrn = mrn;
+        this.agentMrn = mrn;
         this.messageBuffer = messageBuffer;
         socket = s;
     }
@@ -48,7 +48,7 @@ class AgentConnection
             }
             catch (IOException)
             {
-                Console.WriteLine($"Connection reset by: {mrn} at:{socket.RemoteEndPoint}");
+                Console.WriteLine($"Connection reset by: {agentMrn} at:{socket.RemoteEndPoint}");
                 isRunning = false;
             }
             catch (Exception e)
@@ -77,13 +77,13 @@ class AgentConnection
 
         };
 
-        if (!messageBuffer.ContainsKey(mrn))
+        if (!messageBuffer.ContainsKey(agentMrn))
         {
-            Console.WriteLine($" - Buffer diden't have key {mrn}");
+            Console.WriteLine($" - Buffer diden't have key {agentMrn}");
             return response;
         };
 
-        foreach (MmtpMessage m in messageBuffer[mrn])
+        foreach (MmtpMessage m in messageBuffer[agentMrn])
         {
             ApplicationMessage applicationMessage = m.ProtocolMessage.SendMessage.ApplicationMessage;
             response.ResponseMessage.ApplicationMessage.Add(applicationMessage);

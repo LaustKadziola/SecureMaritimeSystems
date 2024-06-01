@@ -68,7 +68,20 @@ public class Agent
         }
     }
 
-    public string Send(int TTL, List<string> MRN, string message)
+    public string Status
+    {
+        get
+        {
+            if (tcpClient.Connected)
+            {
+                return "CONNECTED";
+            }
+
+            return "NOT CONNECTED";
+        }
+    }
+
+    public string Send(long TTL, List<string> MRN, string message)
     {
         MmtpMessage response;
         Recipients recipients = new Recipients();
@@ -198,13 +211,25 @@ public class Agent
     private static MmtpMessage ReadMmtpFromStream(Stream stm)
     {
         byte[] buffer = new byte[1024];
-        int k = stm.Read(buffer, 0, 1024);
-        MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
-        return connectMessage;
+        List<byte> m = [];
+
+        while (true)
+        {
+            int k = stm.Read(buffer, 0, 1024);
+            m.AddRange(buffer[0..k]);
+
+            try
+            {
+                MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(m.ToArray(), 0, m.Count);
+                return connectMessage;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
     }
-
-
-
 
     private static bool ValidateCertificate(X509Certificate cert, ICipherParameters publicKey)
     {

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentTest", "AgentTest\Agen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMSEdgeRouter", "MMSEdgeRouter\MMSEdgeRouter.csproj", "{0CC0B32B-2067-4238-B82B-C25AB9EE067D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTest", "StressTest\StressTest.csproj", "{F549B996-C4DB-4A70-A038-496486F7412F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CC0B32B-2067-4238-B82B-C25AB9EE067D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F549B996-C4DB-4A70-A038-496486F7412F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F549B996-C4DB-4A70-A038-496486F7412F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F549B996-C4DB-4A70-A038-496486F7412F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F549B996-C4DB-4A70-A038-496486F7412F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
