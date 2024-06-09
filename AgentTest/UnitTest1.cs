@@ -10,14 +10,14 @@ public class Tests
     [SetUp]
     public void Setup()
     {
-        agent1.Verbose = true;
+        agent1.Verbose = false;
     }
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
         Directory.CreateDirectory("Certificates");
-        Utils.MakeCert("host1");
+        Utils.KeyPair("host1");
     }
 
     [TearDown]
@@ -42,27 +42,50 @@ public class Tests
     [Test]
     public void TestSend()
     {
-        agent1.ConnectAuthenticated("r1", "cart");
+        agent1.ConnectAuthenticated("r1", "cert");
         long time = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds();
         Assert.That(agent1.Send(time, new List<string> { "host2" }, "hello"), Is.EqualTo(ResponseEnum.Good.ToString()));
     }
 
     [Test]
-    public void TestSendRecieveOwn()
+    public void TestSendRecieve()
     {
-        agent1.ConnectAuthenticated("r1", "cart");
+        agent1.Verbose = true;
+        agent1.ConnectAuthenticated("r1", "cert");
         long time = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds();
         agent1.Send(time, new List<string> { "host1" }, "hello");
-        string response = agent1.Receive();
-        Assert.That(response, Is.EqualTo("hello"));
+        List<string> response = agent1.Receive();
+        Assert.That(response[0], Is.EqualTo(ResponseEnum.Good.ToString()));
+        Assert.That(response[1], Is.EqualTo("hello"), "recived message was hello");
     }
 
     [Test]
-    public void TestReconnectWithoutToken()
+    public void TestReconnect()
     {
-        Assert.That(agent1.ConnectAuthenticated("r1", "cart"), Is.EqualTo(ResponseEnum.Good.ToString()));
+        Assert.That(agent1.ConnectAuthenticated("r1", "cert"), Is.EqualTo(ResponseEnum.Good.ToString()));
         Assert.That(agent1.Disconnect(), Is.EqualTo(ResponseEnum.Good.ToString()));
-        Assert.That(agent1.ConnectAuthenticated("r1", "cart"), Is.EqualTo(ResponseEnum.Good.ToString()));
+        Assert.That(agent1.ConnectAuthenticated("r1", "cert"), Is.EqualTo(ResponseEnum.Good.ToString()));
+    }
+
+    [Test]
+    public void TestNoKey()
+    {
+        Agent agentNoKey = new Agent("hostNoKey");
+        agentNoKey.Verbose = true;
+        Utils.KeyPair("hostNoKey");
+        Utils.DeletePublicKey("hostNoKey");
+
+
+        agentNoKey.ConnectAuthenticated("r1", "cert");
+        agent1.ConnectAuthenticated("r1", "cert");
+
+        long time = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds();
+        agentNoKey.Send(time, new List<string> { "host1" }, "This Shoud Not Be Verified");
+
+        List<string> response = agent1.Receive();
+
+        Assert.That(response[0], Is.EqualTo(ResponseEnum.Good.ToString()), "Status of empty message should be good");
+        Assert.That(response.Count, Is.EqualTo(1));
     }
 
 

@@ -3,8 +3,6 @@ using System.Text;
 using Google.Protobuf;
 using Mmtp;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Crypto.Signers;
@@ -21,14 +19,17 @@ public class Agent
     const string HOST = "10.0.1.1";
     const int PORT = 65432;
 
-    string ownMrn = "someMrn";
+    private List<string> messagesForFilter = [];
+    private Dictionary<string, long> recievedMessages = [];
+
+    public string ownMrn { get; private set; } = "someMrn";
 
     TcpClient tcpClient = new TcpClient();
 
     public Agent(string mrn)
     {
         ownMrn = mrn;
-        Log("Starting agent");
+        Log("Starting agent {mrn}");
     }
 
     public string ConnectAuthenticated(string mrnEdgeRouter, string certificate)
@@ -120,15 +121,16 @@ public class Agent
             }
         };
 
-        string signature = GenerateSignature(SendMessage.ProtocolMessage.SendMessage.ApplicationMessage);
-        Log(signature);
-        SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Signature = signature;
-
+        //The code that tampers with the message.
         //ByteString bodyTampered = ByteString.CopyFrom(message + "wrong stuff", Encoding.UTF8);
         //SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Body = bodyTampered;
 
         try
         {
+            string signature = GenerateSignature(SendMessage.ProtocolMessage.SendMessage.ApplicationMessage);
+            Log(signature);
+            SendMessage.ProtocolMessage.SendMessage.ApplicationMessage.Signature = signature;
+
             Stream stm = tcpClient.GetStream();
             SendMessage.WriteTo(stm);
             response = ReadMmtpFromStream(stm);
@@ -143,8 +145,17 @@ public class Agent
 
     }
 
-    public string Receive(string filter = "")
+    public List<string> Receive()
     {
+        long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        foreach ((string id, long ttl) in recievedMessages.ToList())
+        {
+            if (ttl < currentTime) { recievedMessages.Remove(id); }
+        }
+
+        Filter filter = new Filter();
+        filter.MessageUuids.AddRange(messagesForFilter);
+
         MmtpMessage response;
         MmtpMessage recieveMessage = new MmtpMessage
         {
@@ -152,7 +163,11 @@ public class Agent
             Uuid = Guid.NewGuid().ToString(),
             ProtocolMessage = new ProtocolMessage
             {
-                ProtocolMsgType = ProtocolMessageType.RecieveMessage
+                ProtocolMsgType = ProtocolMessageType.RecieveMessage,
+                ReceiveMessage = new Receive
+                {
+                    Filter = filter
+                }
             }
         };
 
@@ -164,17 +179,59 @@ public class Agent
 
             Log(response.ToString());
 
-            if (!VerifyeSignature(response.ResponseMessage.ApplicationMessage[0]))
+
+            List<string> result = [];
+
+            // The edge router have responded 
+            // and should therefor have deleted the messages from filter
+            // and therefor should we be able to delete the messages.
+            messagesForFilter.Clear();
+            result.Add(response.ResponseMessage.Response.ToString());
+
+            for (int i = 0; i < response.ResponseMessage.ApplicationMessage.Count; i++)
             {
-                Log("Invalid signature");
+                MessageMetadata metadata = response.ResponseMessage.MessageMetadata[i];
+                ApplicationMessage m = response.ResponseMessage.ApplicationMessage[i];
+
+                Log($"processing message with body {m.Body.ToStringUtf8()}");
+
+                long ttl = metadata.Header.Expires;
+                string uuid = metadata.Uuid;
+
+                // The message have expired and we ignore it.
+                if (ttl < currentTime)
+                {
+                    Log($"message have expired {uuid}");
+                    continue;
+                }
+                // The messate have aready been recieved and we ignore it
+                if (recievedMessages.ContainsKey(uuid))
+                {
+                    Log($"received duplicate message {uuid}");
+                    continue;
+                }
+
+                messagesForFilter.Add(uuid);
+                recievedMessages.Add(uuid, ttl);
+
+                Console.WriteLine("hello");
+                if (VerifyeSignature(m))
+                {
+                    result.Add(m.Body.ToStringUtf8());
+                }
+                else
+                {
+                    Log("Invalid signature");
+                }
             }
 
-            return response.ResponseMessage.ApplicationMessage[0].Body.ToStringUtf8();
+            return result;
+
         }
         catch (Exception e)
         {
             Log(e);
-            return ResponseEnum.Error.ToString();
+            return [ResponseEnum.Error.ToString()];
         }
     }
 
@@ -212,7 +269,7 @@ public class Agent
     {
         byte[] buffer = new byte[1024];
         List<byte> m = [];
-
+        int i = 0;
         while (true)
         {
             int k = stm.Read(buffer, 0, 1024);
@@ -223,24 +280,25 @@ public class Agent
                 MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(m.ToArray(), 0, m.Count);
                 return connectMessage;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine($"Failed Passing message iteration: {i}");
+                i++;
             }
         }
 
     }
 
-    private static bool ValidateCertificate(X509Certificate cert, ICipherParameters publicKey)
-    {
-        cert.CheckValidity(DateTime.UtcNow);
-        var tbsCert = cert.GetTbsCertificate();
-        var signature = cert.GetSignature();
-        var signer = SignerUtilities.GetSigner(cert.SigAlgName);
-        signer.Init(false, publicKey);
-        signer.BlockUpdate(tbsCert, 0, tbsCert.Length);
-        return signer.VerifySignature(signature);
-    }
+    // private static bool ValidateCertificate(X509Certificate cert, ICipherParameters publicKey)
+    // {
+    //     cert.CheckValidity(DateTime.UtcNow);
+    //     var tbsCert = cert.GetTbsCertificate();
+    //     var signature = cert.GetSignature();
+    //     var signer = SignerUtilities.GetSigner(cert.SigAlgName);
+    //     signer.Init(false, publicKey);
+    //     signer.BlockUpdate(tbsCert, 0, tbsCert.Length);
+    //     return signer.VerifySignature(signature);
+    // }
 
     private void Log(object x)
     {
@@ -293,11 +351,21 @@ public class Agent
 
     private static bool VerifyeSignature(ApplicationMessage message)
     {
+        string filePath = Utils.GetpathPublic(message.Header.Sender);
+        Console.WriteLine($"Checking file {filePath}");
+
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine($"File didnt exist {filePath}");
+            return false;
+        }
+
+
         byte[] messageHash = GenerateHash(message);
         AsnReader asnReader = new(Convert.FromBase64String(message.Signature), AsnEncodingRules.DER);
 
         // Get the public key
-        PemReader pemReader = new PemReader(new StreamReader(Utils.GetpathPublic(message.Header.Sender)));
+        PemReader pemReader = new PemReader(new StreamReader(filePath));
         ECPublicKeyParameters publicKeyParameters = (ECPublicKeyParameters)pemReader.ReadObject();
 
         ECDsaSigner signer = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
@@ -309,5 +377,4 @@ public class Agent
 
         return res;
     }
-
 }

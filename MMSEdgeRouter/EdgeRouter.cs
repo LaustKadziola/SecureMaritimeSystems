@@ -16,10 +16,11 @@ class EdgeRouter
 
     public Dictionary<string, Thread> ConnectionThreads = [];
 
-    public readonly ConcurrentDictionary<string, List<MmtpMessage>> messageBuffer = [];
+    public readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MmtpMessage>> messageBuffer = [];
 
     public EdgeRouter(string host, int port)
     {
+        Console.WriteLine(Environment.ProcessorCount);
         HOST = host;
         PORT = port;
     }
@@ -30,31 +31,54 @@ class EdgeRouter
         Thread trimThread = new Thread(TrimTimeoutMessages);
         trimThread.Start();
 
-        while (true)
-        {
-            ListenForConnection();
-        }
+        ListenForConnection();
+
     }
 
     public void ListenForConnection()
     {
+        // Initializing socket and stream
+        IPAddress iPAddress = IPAddress.Parse(HOST);
+        TcpListener listener = new TcpListener(iPAddress, PORT);
+        listener.Start();
+        while (true)
+        {
+            try
+            {
+                Socket s = listener.AcceptSocket();
+                Thread connection = new Thread(() => ConnectionThread(s));
+                connection.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+
+    private static MmtpMessage ReadMmtpFromStream(Stream stm)
+    {
+        byte[] buffer = new byte[1024];
+        int k = stm.Read(buffer, 0, 1024);
+        MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
+        return connectMessage;
+    }
+
+    private void ConnectionThread(Socket socket)
+    {
         try
         {
-            // Initializing socket and stream
-            IPAddress iPAddress = IPAddress.Parse(HOST);
-            TcpListener listener = new TcpListener(iPAddress, PORT);
-            listener.Start();
-            Socket s = listener.AcceptSocket();
-            Stream stm = new NetworkStream(s, ownsSocket: true);
+            Stream stm = new NetworkStream(socket, ownsSocket: true);
             // Getting connection message
-
+            stm.WriteTimeout = 1000;
             MmtpMessage connectMessage = ReadMmtpFromStream(stm);
 
             string responseToUuid = connectMessage.Uuid;
             string mrn = connectMessage.ProtocolMessage.ConnectMessage.OwnMrn;
 
+
             Console.WriteLine($"connecting to: {mrn}");
-            Console.WriteLine($"At: {s.RemoteEndPoint}");
+            Console.WriteLine($"At: {socket.RemoteEndPoint}");
 
             MmtpMessage response = new MmtpMessage
             {
@@ -68,32 +92,16 @@ class EdgeRouter
             };
 
             response.WriteTo(stm);
-
-            Thread connection = new Thread(() => ConnectionThread(s, mrn));
-            connection.Start();
-            ConnectionThreads.Add(mrn, connection);
-            listener.Stop();
-
+            AgentConnection connection = new AgentConnection(mrn, socket, messageBuffer);
+            //ConnectionThreads.Add(mrn, connection);
+            connection.Run();
+            ConnectionThreads.Remove(mrn);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
-    }
 
-    private static MmtpMessage ReadMmtpFromStream(Stream stm)
-    {
-        byte[] buffer = new byte[1024];
-        int k = stm.Read(buffer, 0, 1024);
-        MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
-        return connectMessage;
-    }
-
-    private void ConnectionThread(Socket socket, string mrn)
-    {
-        AgentConnection connection = new AgentConnection(mrn, socket, messageBuffer);
-        connection.Run();
-        ConnectionThreads.Remove(mrn);
     }
 
     private void TrimTimeoutMessages()
@@ -101,23 +109,25 @@ class EdgeRouter
         while (true)
         {
             Thread.Sleep(1000);
-            foreach (List<MmtpMessage> messageList in messageBuffer.Values)
+            long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            foreach (ConcurrentDictionary<string, MmtpMessage> messageDict in messageBuffer.Values)
             {
-                for (int i = messageList.Count - 1; i >= 0; i--)
+                foreach (MmtpMessage message in messageDict.Values)
                 {
-                    long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    long expiers = messageList[i].
+                    long expiers = message.
                         ProtocolMessage.
                         SendMessage.
                         ApplicationMessage.
                         Header.
                         Expires;
+
                     if (currentTime > expiers)
                     {
-                        Console.WriteLine($"deleted {messageList[i].Uuid}");
+                        Console.WriteLine($"deleted {message.Uuid}");
                         Console.WriteLine($"    {currentTime} > {expiers}");
 
-                        messageList.RemoveAt(i);
+                        messageDict.Remove(message.Uuid, out _);
                     }
                 }
             }

@@ -1,0 +1,188 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "BouncyCastle.Cryptography/2.3.1": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Google.Protobuf/3.26.1": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/Google.Protobuf.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Google.Protobuf.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "MMSAgent/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.3.1",
+          "Google.Protobuf": "3.26.1",
+          "Mmtp": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MMSAgent.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MMSAgent.dll": {}
+        }
+      },
+      "Mmtp/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Google.Protobuf": "3.26.1"
+        },
+        "compile": {
+          "bin/placeholder/Mmtp.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Mmtp.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BouncyCastle.Cryptography/2.3.1": {
+      "sha512": "buwoISwecYke3CmgG1AQSg+sNZjJeIb93vTAtJiHZX35hP/teYMxsfg0NDXGUKjGx6BKBTNKc77O2M3vKvlXZQ==",
+      "type": "package",
+      "path": "bouncycastle.cryptography/2.3.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "bouncycastle.cryptography.2.3.1.nupkg.sha512",
+        "bouncycastle.cryptography.nuspec",
+        "lib/net461/BouncyCastle.Cryptography.dll",
+        "lib/net461/BouncyCastle.Cryptography.xml",
+        "lib/net6.0/BouncyCastle.Cryptography.dll",
+        "lib/net6.0/BouncyCastle.Cryptography.xml",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
+        "packageIcon.png"
+      ]
+    },
+    "Google.Protobuf/3.26.1": {
+      "sha512": "CHZX8zXqhF/fdUtd+AYzew8T2HFkAoe5c7lbGxZY/qryAlQXckDvM5BfOJjXlMS7kyICqQTMszj4w1bX5uBJ/w==",
+      "type": "package",
+      "path": "google.protobuf/3.26.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "google.protobuf.3.26.1.nupkg.sha512",
+        "google.protobuf.nuspec",
+        "lib/net45/Google.Protobuf.dll",
+        "lib/net45/Google.Protobuf.pdb",
+        "lib/net45/Google.Protobuf.xml",
+        "lib/net5.0/Google.Protobuf.dll",
+        "lib/net5.0/Google.Protobuf.pdb",
+        "lib/net5.0/Google.Protobuf.xml",
+        "lib/netstandard1.1/Google.Protobuf.dll",
+        "lib/netstandard1.1/Google.Protobuf.pdb",
+        "lib/netstandard1.1/Google.Protobuf.xml",
+        "lib/netstandard2.0/Google.Protobuf.dll",
+        "lib/netstandard2.0/Google.Protobuf.pdb",
+        "lib/netstandard2.0/Google.Protobuf.xml"
+      ]
+    },
+    "MMSAgent/1.0.0": {
+      "type": "project",
+      "path": "../MMSAgent/MMSAgent.csproj",
+      "msbuildProject": "../MMSAgent/MMSAgent.csproj"
+    },
+    "Mmtp/1.0.0": {
+      "type": "project",
+      "path": "../Mmtp/Mmtp.csproj",
+      "msbuildProject": "../Mmtp/Mmtp.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "MMSAgent >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "/home/mininet/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/mininet/Desktop/SecureMaritimeSystems/PerformanceTest/PerformanceTest.csproj",
+      "projectName": "PerformanceTest",
+      "projectPath": "/home/mininet/Desktop/SecureMaritimeSystems/PerformanceTest/PerformanceTest.csproj",
+      "packagesPath": "/home/mininet/.nuget/packages/",
+      "outputPath": "/home/mininet/Desktop/SecureMaritimeSystems/PerformanceTest/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/home/mininet/Desktop/NuGet.Config",
+        "/home/mininet/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "/home/mininet/.nuget/packages": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "/home/mininet/Desktop/SecureMaritimeSystems/MMSAgent/MMSAgent.csproj": {
+              "projectPath": "/home/mininet/Desktop/SecureMaritimeSystems/MMSAgent/MMSAgent.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      }
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.300/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

@@ -12,7 +12,6 @@ using Org.BouncyCastle.Security;
 
 class RunAgent
 {
-
     static bool isRunning = true;
 
 
@@ -24,7 +23,7 @@ class RunAgent
         agent.Verbose = true;
         string certificate = GenerateCertificate(mrn);
 
-        Utils.MakeCert(mrn);
+        Utils.KeyPair(mrn);
 
         while (isRunning)
         {
@@ -35,7 +34,7 @@ class RunAgent
                 "c" => agent.ConnectAuthenticated("r1", certificate),
                 "s" => SendHelper(agent),
                 "q" => Quit(),
-                "r" => agent.Receive(),
+                "r" => ReceiveHelper(agent),
                 "d" => agent.Disconnect(),
                 _ => "Undefined Command"
             };
@@ -62,6 +61,15 @@ class RunAgent
         return agent.Send(DateTimeOffset.Now.Add(TimeSpan.FromMinutes(0.3)).ToUnixTimeMilliseconds(), mrn, message);
     }
 
+    private static string ReceiveHelper(Agent agent)
+    {
+        List<string> response = agent.Receive();
+        for (int i = 1; i < response.Count; i++)
+        {
+            Console.WriteLine(response[i]);
+        }
+        return response[0];
+    }
 
     private static string GenerateCertificate(string mrn)
     {

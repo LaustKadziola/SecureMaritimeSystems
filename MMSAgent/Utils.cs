@@ -28,20 +28,25 @@ public static class Utils
         "Certificates", $"Public-{mrn}.prm");
     }
 
-    public static void MakeCert(string mrn)
+    public static void DeletePublicKey(string mrn)
     {
+        File.Delete(GetpathPublic(mrn));
+    }
+
+    public static void KeyPair(string mrn)
+    {
+        if (File.Exists(GetpathPrivate(mrn)) && File.Exists(GetpathPublic(mrn)))
+        {
+            return;
+        }
+
         var curvename = "secp256k1";
 
         X9ECParameters par = ECNamedCurveTable.GetByName(curvename);
-
         var curParam = new ECDomainParameters(par.Curve, par.G, par.N, par.H, par.GetSeed());
-
         ECKeyGenerationParameters keyGenParam = new ECKeyGenerationParameters(curParam, new SecureRandom());
-
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
-
         generator.Init(keyGenParam);
-
         AsymmetricCipherKeyPair keyPair = generator.GenerateKeyPair();
 
         var privateKey = (ECPrivateKeyParameters)keyPair.Private;

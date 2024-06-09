@@ -42,6 +42,7 @@ def topology():
         s1.cmd("ovs-ofctl add-flow s1 priority=1,arp,actions=flood")
         s1.cmd("ovs-ofctl add-flow s1 priority=65535,ip,dl_dst=00:00:00:00:01:01,actions=output:1")
         s1.cmd("ovs-ofctl add-flow s1 priority=10,ip,nw_dst=10.0.1.0/24,actions=output:2")
+        
         s2.cmd("ovs-ofctl add-flow s2 priority=1,arp,actions=flood")
         s2.cmd("ovs-ofctl add-flow s2 priority=65535,ip,dl_dst=00:00:00:00:01:02,actions=output:1")
         s2.cmd("ovs-ofctl add-flow s2 priority=10,ip,nw_dst=10.0.2.0/24,actions=output:2")

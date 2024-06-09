@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MMSEdgeRouter", "MMSEdgeRou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTest", "StressTest\StressTest.csproj", "{F549B996-C4DB-4A70-A038-496486F7412F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flooding", "Flooding\Flooding.csproj", "{752C394C-7713-4658-8CEF-046BE5760E76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{65676CDB-4343-475A-A942-BA750B7E8380}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{F549B996-C4DB-4A70-A038-496486F7412F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F549B996-C4DB-4A70-A038-496486F7412F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F549B996-C4DB-4A70-A038-496486F7412F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{752C394C-7713-4658-8CEF-046BE5760E76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{752C394C-7713-4658-8CEF-046BE5760E76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{752C394C-7713-4658-8CEF-046BE5760E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{752C394C-7713-4658-8CEF-046BE5760E76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65676CDB-4343-475A-A942-BA750B7E8380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65676CDB-4343-475A-A942-BA750B7E8380}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65676CDB-4343-475A-A942-BA750B7E8380}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65676CDB-4343-475A-A942-BA750B7E8380}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

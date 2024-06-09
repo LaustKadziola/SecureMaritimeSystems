@@ -12,9 +12,9 @@ class AgentConnection
 
     readonly string agentMrn;
 
-    public readonly ConcurrentDictionary<string, List<MmtpMessage>> messageBuffer;
+    public readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MmtpMessage>> messageBuffer;
 
-    public AgentConnection(string mrn, Socket s, ConcurrentDictionary<string, List<MmtpMessage>> messageBuffer)
+    public AgentConnection(string mrn, Socket s, ConcurrentDictionary<string, ConcurrentDictionary<string, MmtpMessage>> messageBuffer)
     {
         this.agentMrn = mrn;
         this.messageBuffer = messageBuffer;
@@ -27,7 +27,6 @@ class AgentConnection
         {
             try
             {
-                byte[] buf = new byte[1024];
                 Stream stm = new NetworkStream(socket, ownsSocket: true);
                 MmtpMessage messageRecv = ReadMmtpFromStream(stm);
 
@@ -63,7 +62,7 @@ class AgentConnection
 
     private MmtpMessage HandleReceiveMessage(MmtpMessage message)
     {
-        Console.WriteLine("Recived Recieve message");
+        //Console.WriteLine("Recived Recieve message");
 
         MmtpMessage response = new MmtpMessage
         {
@@ -77,16 +76,29 @@ class AgentConnection
 
         };
 
+        List<string> filter = message.ProtocolMessage.ReceiveMessage.Filter.MessageUuids.ToList();
+
+        foreach (string uuid in filter)
+        {
+            //Console.WriteLine("Removed: " + uuid);
+            if (messageBuffer[agentMrn].ContainsKey(uuid))
+            {
+                messageBuffer[agentMrn].TryRemove(uuid, out _); //Out comment to test replay
+            }
+        }
+
         if (!messageBuffer.ContainsKey(agentMrn))
         {
             Console.WriteLine($" - Buffer diden't have key {agentMrn}");
             return response;
         };
 
-        foreach (MmtpMessage m in messageBuffer[agentMrn])
+        foreach (MmtpMessage m in messageBuffer[agentMrn].Values)
         {
             ApplicationMessage applicationMessage = m.ProtocolMessage.SendMessage.ApplicationMessage;
             response.ResponseMessage.ApplicationMessage.Add(applicationMessage);
+            MessageMetadata metadata = new MessageMetadata { Uuid = m.Uuid, Header = applicationMessage.Header };
+            response.ResponseMessage.MessageMetadata.Add(metadata);
         }
 
         return response;
@@ -94,7 +106,7 @@ class AgentConnection
 
     private MmtpMessage HandleSendMessage(MmtpMessage message)
     {
-        Console.WriteLine("Recived Send message");
+        //Console.WriteLine("Recived Send message");
 
         var recipients = message
             .ProtocolMessage
@@ -108,8 +120,8 @@ class AgentConnection
             {
                 messageBuffer[recipient] = [];
             }
-            Console.WriteLine($" - To mrn: {recipient}");
-            messageBuffer[recipient].Add(message);
+            //Console.WriteLine($" - To mrn: {recipient}");
+            messageBuffer[recipient][message.Uuid] = message;
         }
 
         MmtpMessage response = new MmtpMessage
@@ -146,13 +158,37 @@ class AgentConnection
         return response;
     }
 
+    // private static MmtpMessage ReadMmtpFromStream(Stream stm)
+    // {
+    //     MmtpMessage connectMessage = new MmtpMessage();
+    //     int k = 0;
+    //     byte[] buffer = new byte[1024];
+    //     k = stm.Read(buffer, 0, 1024);
+    //     connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
+    //     return connectMessage;
+    // }
+
     private static MmtpMessage ReadMmtpFromStream(Stream stm)
     {
-        MmtpMessage connectMessage = new MmtpMessage();
-        int k = 0;
         byte[] buffer = new byte[1024];
-        k = stm.Read(buffer, 0, 1024);
-        connectMessage = MmtpMessage.Parser.ParseFrom(buffer, 0, k);
-        return connectMessage;
+        List<byte> m = [];
+        int i = 0;
+        while (true)
+        {
+            int k = stm.Read(buffer, 0, 1024);
+            m.AddRange(buffer[0..k]);
+
+            try
+            {
+                MmtpMessage connectMessage = MmtpMessage.Parser.ParseFrom(m.ToArray(), 0, m.Count);
+                return connectMessage;
+            }
+            catch (Exception)
+            {
+                //Console.WriteLine($"Failed Passing message iteration: {i}");
+                i++;
+            }
+        }
+
     }
 }
