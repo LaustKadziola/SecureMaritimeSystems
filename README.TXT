@@ -1,3 +1,6 @@
+Link to git repository:
+https://github.com/LaustKadziola/SecureMaritimeSystems.git
+
 #################
 ##   Mininet   ##
 #################
